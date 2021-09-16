@@ -1,11 +1,14 @@
 from pymongo import MongoClient
 import pymongo
 from random import randint
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 
 def get_database():
     client = MongoClient(
-        "mongodb+srv://Mateusz:Q7e2fhwevHCKr6sg@cluster0.e9nku.mongodb.net/test"
+        f"mongodb+srv://{os.environ.get('USERNAME')}:{os.environ.get('PASSWD')}@cluster0.e9nku.mongodb.net/test"
     )
     return client['socialApp']
 
