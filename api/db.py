@@ -31,12 +31,13 @@ async def getAllPosts():
 
 async def getPostByUserId(_id):
     collN = defineCollectionName("post")
-    return collN.find({"createdBy": int(_id)})
+    res = collN.find({"createdBy": int(_id)})
+    return res
 
 
 async def getProfilPage(_id):
     collN = defineCollectionName("user")
-    return collN.find_one({"_id": _id})
+    return collN.find({"_id": _id})[0]
 
 
 async def searchUserProfile(name):
@@ -65,6 +66,6 @@ async def postCreation(postData):
         if not list(collN.find({"_id": _id})):
             postData['_id'] = _id
             break
+    postData['createdBy'] = 623183
     inserted = collN.insert_one(postData)
     return 1
-

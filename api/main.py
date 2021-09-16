@@ -8,7 +8,7 @@ from db import (
     userCreation,
     postCreation
 )
-from model import Post, User
+from model import EntryPost, EntryUser
 app = FastAPI()
 
 origins = [
@@ -29,14 +29,14 @@ async def root():
 
 
 @app.post("/api/create-user", tags=["Creation"])
-async def createUser(userData: User) -> dict:
+async def createUser(userData: EntryUser) -> dict:
     res = await userCreation(userData.dict())
     return {"data": "Added"}
 
 
 @app.get("/api/search-user/{name}", tags=["User"])
 async def searchUserByName(name: str) -> dict:
-    res = await searchUserProfile(name.split())
+    res = await searchUserProfile(name.title().split())
 
     return {"data": list(res)}
 
@@ -44,7 +44,7 @@ async def searchUserByName(name: str) -> dict:
 @app.get("/api/profil-page/{_id}", tags=["User"])
 async def profilPage(_id: int) -> dict:
     res = await getProfilPage(_id)
-    return {"data": list(res)}
+    return res
 
 
 @app.get("/api/show-post", tags=["Posts"])
@@ -60,6 +60,6 @@ async def showPostsOfUser(_id) -> dict:
 
 
 @app.post("/api/add-post", tags=["Creation"])
-async def addPost(postData: Post) -> dict:
+async def addPost(postData: EntryPost) -> dict:
     res = await postCreation(postData.dict())
     return {"data": "Added"}

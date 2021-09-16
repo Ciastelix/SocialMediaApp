@@ -12,3 +12,13 @@ class User(BaseModel):
     _id: int
     firstName: str
     lastName: str
+
+
+class EntryPost(BaseModel):
+    title: str
+    content: str
+
+
+class EntryUser(BaseModel):
+    firstName: str
+    lastName: str

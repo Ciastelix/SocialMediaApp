@@ -1,0 +1,45 @@
+.Form {
+  width: 100%;
+  height: 100%;
+  text-align: center;
+}
+.Input:last-of-type {
+  width: 10%;
+  margin: 3ex;
+}
+.Input[type="text"] {
+  text-transform: capitalize;
+  color: #004628;
+}
+.Input:focus {
+  border: 2px solid red;
+  background-color: #acacac;
+}
+.Input[type="button"] {
+  width: auto;
+  font-size: x-large;
+  background-color: #ff1200;
+  border-radius: 10px;
+  border: none;
+  box-shadow: none;
+  color: wheat;
+}
+.Input::before {
+  content: "\A";
+  white-space: pre;
+}
+.Input[type="button"]:active {
+  background-color: #cd7f32;
+  color: #fcf6f4;
+}
+.Label {
+  text-transform: capitalize;
+  font-size: larger;
+  display: inline-block;
+  margin: 0.5em 10px 0.5em;
+  width: auto;
+  color: black;
+}
+.Label::after {
+  content: ": ";
+}

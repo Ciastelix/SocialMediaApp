@@ -1,24 +1,37 @@
-import logo from './logo.svg';
+import { Route, Switch, Link } from 'react-router-dom';
 import './App.css';
-
+import AddPost from './components/AddPost';
+import Profile from './components/Profile';
+import AddUser from './components/AddUser';
+import NavBar from './components/NavBar';
+import SearchForUser from './components/SearchForUser'
+import { createContext, useState } from 'react';
+export const MainContext = createContext();
 function App() {
+  const [usrname, setUsrname] = useState(undefined);
+  const currUsername = {
+    usrname: usrname,
+    setUsrname : (usr) => setUsrname(usr)
+  }
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <MainContext.Provider value={currUsername}>
+    <div className="App"> 
+        <NavBar />
+        
+      <Switch>
+        
+        <Route exact path="/" />
+        <Route path="/profile/:id" component={Profile} />
+        <Route path="/add/post" exact component={AddPost} />
+        <Route path="/add/user" exact component={AddUser} />
+        <Route path="/search/user/:usr" exact>
+          <SearchForUser/>
+        </Route>
+
+
+        </Switch>
+      </div>
+      </MainContext.Provider>
   );
 }
 

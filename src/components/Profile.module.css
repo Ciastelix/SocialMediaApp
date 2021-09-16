@@ -1,0 +1,25 @@
+.Header {
+  font-size: xx-large;
+}
+.Content {
+  font-size: xx-large;
+  margin: auto;
+  margin-top: 2em;
+  margin-bottom: 1rem;
+  padding: 1.5rem;
+}
+.PostTitle {
+  margin: 10px 0px 10px 10px;
+}
+.PostsPage {
+  padding: 0px;
+  width: 100%;
+  height: auto;
+  margin: auto;
+  margin-left: 2em;
+  text-align: left;
+}
+.PostContent {
+  margin: 0px;
+  padding: 0px;
+}
