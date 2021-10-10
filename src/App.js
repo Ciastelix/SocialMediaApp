@@ -5,7 +5,8 @@ import Profile from './components/Profile';
 import AddUser from './components/AddUser';
 import NavBar from './components/NavBar';
 import SearchForUser from './components/SearchForUser'
-import { createContext, useState } from 'react';
+import { createContext, useState, useEffect } from 'react';
+import axios from 'axios';
 export const MainContext = createContext();
 function App() {
   const [usrname, setUsrname] = useState(undefined);

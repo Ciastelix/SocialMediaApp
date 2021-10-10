@@ -10,7 +10,7 @@ export default function Profile() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        axios.get(`http://localhost:8000/api/profil-page/${id}`).then((res) => setUserData(res.data))
+        axios.get(`http://localhost:8000/user/${id}`).then((res) => setUserData(res.data))
         axios.get(`http://localhost:8000/api/show-post/${id}`).then((res) => setPosts(res.data.data))
         setLoading(false)
     }, [id])

@@ -7,9 +7,9 @@ export default function SearchForUser() {
     const { usr } = useParams();
     const [users, setUsers] = useState([]);
     useEffect(() => {
-        axios.get(`http://localhost:8000/api/search-user/${usr}`).then((res) => setUsers(res.data.data));
+        axios.post(`http://localhost:8000/search/user`, {"name" : usr}).then((res) => setUsers(res.data));
     }, [])
-    console.log(users);
+    
     return (
         <>
             {users ?<>

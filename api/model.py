@@ -1,24 +1,28 @@
-from pydantic import BaseModel
+from sqlalchemy.orm import relationship
+from sqlalchemy import Column, ForeignKey, Integer, String
+import database
 
 
-class Post(BaseModel):
-    _id: int
-    title: str
-    content: str
-    createdBy: int
+class Post(database.Base):
+    __tablename__ = "posts"
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, index=True)
+    content = Column(String, index=True)
+    createdBy = Column(Integer, ForeignKey("users.id"))
+
+    creator = relationship("User", backref="creator")
 
 
-class User(BaseModel):
-    _id: int
-    firstName: str
-    lastName: str
+class Friend(database.Base):
+    __tablename__ = "friends"
+    id = Column(Integer, primary_key=True, index=True)
+    _id1 = Column(Integer)
+    _id2 = Column(Integer)
 
 
-class EntryPost(BaseModel):
-    title: str
-    content: str
+class User(database.Base):
+    __tablename__ = "users"
 
-
-class EntryUser(BaseModel):
-    firstName: str
-    lastName: str
+    id = Column(Integer, primary_key=True, index=True)
+    firstName = Column(String, index=True)
+    lastName = Column(String, index=True)

@@ -1,14 +1,23 @@
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI
-from db import (
-    getAllPosts,
-    getPostByUserId,
-    getProfilPage,
-    searchUserProfile,
-    userCreation,
-    postCreation
-)
-from model import EntryPost, EntryUser
+from fastapi import FastAPI, Depends
+from sqlalchemy.orm import Session
+import database
+import manageDB
+# (
+#     getAllPosts,
+#     getPostByUserId,
+#     getProfilPage,
+#     searchUserProfile,
+#     userCreation,
+#     postCreation,
+#     addFriend,
+#     showFriendReq,
+#     # showAllFriends,
+#     getUser
+# )
+import schema
+import model
+from typing import List
 app = FastAPI()
 
 origins = [
@@ -21,45 +30,44 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+database.Base.metadata.create_all(bind=database.engine)
 
 
-@app.get("/")
-async def root():
-    return {"Hey": "Hello"}
+def get_db():
+    db = database.SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
-@app.post("/api/create-user", tags=["Creation"])
-async def createUser(userData: EntryUser) -> dict:
-    res = await userCreation(userData.dict())
-    return {"data": "Added"}
+@app.post("/users/", response_model=schema.EntryUser)
+def create_user(user: schema.EntryUser, db: Session = Depends(get_db)):
+    return manageDB.userCreation(db=db, user=user)
 
 
-@app.get("/api/search-user/{name}", tags=["User"])
-async def searchUserByName(name: str) -> dict:
-    res = await searchUserProfile(name.title().split())
-
-    return {"data": list(res)}
-
-
-@app.get("/api/profil-page/{_id}", tags=["User"])
-async def profilPage(_id: int) -> dict:
-    res = await getProfilPage(_id)
-    return res
+@app.get("/users/", response_model=List[schema.EntryUser])
+def getAllUsers(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    users = manageDB.getAllUsers(db, skip=skip, limit=limit)
+    return users
 
 
-@app.get("/api/show-post", tags=["Posts"])
-async def showPosts() -> dict:
-    res = await getAllPosts()
-    return {"data": list(res)}
+@app.get("/user/{_id}", response_model=List[schema.GetUser])
+def getUser(_id, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    users = manageDB.getPostByUserId(db, _id=_id, skip=skip, limit=limit)
+    return users
 
 
-@app.get("/api/show-post/{_id}", tags=["Posts"])
-async def showPostsOfUser(_id) -> dict:
-    res = await getPostByUserId(_id)
-    return {"data": list(res)}
+@app.post("/add/post", response_model=schema.EntryPost)
+def add_post(post: schema.EntryPost, db: Session = Depends(get_db)):
+    return manageDB.postCreation(db=db, post=post, user_id=77448781)
 
 
-@app.post("/api/add-post", tags=["Creation"])
-async def addPost(postData: EntryPost) -> dict:
-    res = await postCreation(postData.dict())
-    return {"data": "Added"}
+@app.get("/get/posts", response_model=List[schema.GetPost])
+def get_post(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    return manageDB.getAllPosts(db, skip=skip, limit=limit)
+
+
+@app.post("/search/user", response_model=List[schema.GetUser])
+def searchUser(name: schema.Name, db: Session = Depends(get_db)):
+    return manageDB.searchUserProfile(db, name=name)
