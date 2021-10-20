@@ -1,51 +1,34 @@
-import model
-import schema
-from sqlalchemy.orm import Session
-from random import randint
+from models import User
+from passlib.hash import bcrypt
+from fastapi import Depends, status, HTTPException
+from schemas import UserPydantic
+from main import oauth2Scheme
+import jwt
+from os import environ
 
 
-def getAllPosts(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(model.Post).offset(skip).limit(limit).all()
+async def createUser(user):
+    return User(username=user.username, passwordHash=bcrypt.hash(user.passwordHash))
 
 
-def getPostByUserId(db: Session, usr: schema.EntryUser):
-    return usr.posts
+async def authUser(username: str, password: str):
+    user = await User.get(username=username)
+    if not user:
+        return False
+    if not user.verifyPassword(password):
+        return False
+    return user
 
 
-def getProfilPage(db: Session, user_id: int):
-    return db.query(model.User).filter(model.User.id == user_id).first()
+async def getCurrentUser(token: str = Depends(oauth2Scheme)):
+    try:
+        payload = jwt.decode(token, str(
+            environ.get("JWT_SECRET")), algorithms=['HS256'])
+        user = await User.get(id=payload.get('id'))
+    except:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail='Invalid username or password'
+        )
 
-
-def searchUserProfile(db: Session, name: str):
-    name = name.name.split()
-    if len(name) == 2:
-        return db.query(model.User).filter(model.User.firstName == name[0] & model.User.lastName == name[1]).all()
-    return db.query(model.User).filter(model.User.firstName == name[0]).all()
-
-
-def userCreation(db: Session, user: schema.EntryUser):
-    while True:
-        id = randint(0, 100000000)
-        if not db.query(model.User).filter(model.User.id == id).first():
-            db_user = model.User(**user.dict(), id=id)
-            db.add(db_user)
-            db.commit()
-            db.refresh(db_user)
-        break
-    return db_user
-
-
-def postCreation(db: Session, post: schema.EntryPost, user_id: int):
-    db_post = model.Post(**post.dict(), createdBy=user_id)
-    db.add(db_post)
-    db.commit()
-    db.refresh(db_post)
-    return db_post
-
-
-def getUser(db: Session, _id: int):
-    return db.query(model.User).filter(model.User.id == _id).first()
-
-
-def getAllUsers(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(model.User).offset(skip).limit(limit).all()
+    return await UserPydantic.from_tortoise_orm(user)

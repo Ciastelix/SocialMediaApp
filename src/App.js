@@ -10,10 +10,14 @@ import axios from 'axios';
 export const MainContext = createContext();
 function App() {
   const [usrname, setUsrname] = useState(undefined);
+  const [posts, setPosts] = useState([]);
   const currUsername = {
     usrname: usrname,
     setUsrname : (usr) => setUsrname(usr)
   }
+      useEffect(() => {
+        axios.get(`http://localhost:8000/get/posts`).then((res) => setPosts(res.data))
+      }, [])
   return (
     <MainContext.Provider value={currUsername}>
     <div className="App"> 
@@ -31,6 +35,13 @@ function App() {
 
 
         </Switch>
+        {posts.map((post => (
+          <>
+            <h1>{post.title}</h1>
+            <p>{post.content}</p>
+          </>
+        )
+        ))}
       </div>
       </MainContext.Provider>
   );

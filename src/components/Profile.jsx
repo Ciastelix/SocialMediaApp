@@ -11,7 +11,7 @@ export default function Profile() {
 
     useEffect(() => {
         axios.get(`http://localhost:8000/user/${id}`).then((res) => setUserData(res.data))
-        axios.get(`http://localhost:8000/api/show-post/${id}`).then((res) => setPosts(res.data.data))
+        axios.get(`http://localhost:8000/posts/${id}`).then((res) => setPosts(res.data))
         setLoading(false)
     }, [id])
     return (

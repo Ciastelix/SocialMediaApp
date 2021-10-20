@@ -17,7 +17,7 @@ export default function SearchForUser() {
                 {users.map((user) => (
                     <>
                         
-                        <h2><Link className={styles.Link}  to={`/profile/${user._id}`}>{user.firstName} {user.lastName}</Link></h2>
+                        <h2><Link className={styles.Link}  to={`/profile/${user.id}`}>{user.firstName} {user.lastName}</Link></h2>
                     </>
                 ))}</>
                 :

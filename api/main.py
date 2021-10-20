@@ -1,23 +1,12 @@
+from manageDB import createUser, authUser, getCurrentUser
+from schemas import UseerInPydantic, UserPydantic
+import jwt
+from os import environ
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI, Depends
-from sqlalchemy.orm import Session
-import database
-import manageDB
-# (
-#     getAllPosts,
-#     getPostByUserId,
-#     getProfilPage,
-#     searchUserProfile,
-#     userCreation,
-#     postCreation,
-#     addFriend,
-#     showFriendReq,
-#     # showAllFriends,
-#     getUser
-# )
-import schema
-import model
-from typing import List
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi import FastAPI, Depends, HTTPException, status
+from tortoise.contrib.fastapi import register_tortoise
+
 app = FastAPI()
 
 origins = [
@@ -30,44 +19,42 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-database.Base.metadata.create_all(bind=database.engine)
 
 
-def get_db():
-    db = database.SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+oauth2Scheme = OAuth2PasswordBearer(tokenUrl="token")
+register_tortoise(
+    app,
+    db_url="sqlite://db.sqlite3",
+    modules={"models": ['models']},
+    generate_schemas=True,
+    add_exception_handlers=True
+)
+# TODO: zarzadanie postami, użytkownikiem, jwt
 
 
-@app.post("/users/", response_model=schema.EntryUser)
-def create_user(user: schema.EntryUser, db: Session = Depends(get_db)):
-    return manageDB.userCreation(db=db, user=user)
+@app.post("/token")
+async def geenerateToken(form_data: OAuth2PasswordRequestForm = Depends()):
+    user = await authUser(form_data.username, form_data.password)
+    if not user:
+        return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid username or password")
+    userObj = await UserPydantic.from_tortoise_orm(user)
+
+    token = jwt.encode(userObj.dict(), str(environ.get("JWT_SECRET")))
+    return {"access_token": token, "token_type": "bearer"}
 
 
-@app.get("/users/", response_model=List[schema.EntryUser])
-def getAllUsers(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    users = manageDB.getAllUsers(db, skip=skip, limit=limit)
-    return users
+@app.get("/")
+async def index(token: str = Depends(oauth2Scheme)):
+    return {"the_token": token}
 
 
-@app.get("/user/{_id}", response_model=List[schema.GetUser])
-def getUser(_id, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    users = manageDB.getPostByUserId(db, _id=_id, skip=skip, limit=limit)
-    return users
+@app.post("/users", response_model=UserPydantic)
+async def createUser(user: UseerInPydantic):
+    userObj = await createUser(user)
+    await userObj.save()
+    return await UserPydantic.from_tortoise_orm(userObj)
 
 
-@app.post("/add/post", response_model=schema.EntryPost)
-def add_post(post: schema.EntryPost, db: Session = Depends(get_db)):
-    return manageDB.postCreation(db=db, post=post, user_id=77448781)
-
-
-@app.get("/get/posts", response_model=List[schema.GetPost])
-def get_post(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    return manageDB.getAllPosts(db, skip=skip, limit=limit)
-
-
-@app.post("/search/user", response_model=List[schema.GetUser])
-def searchUser(name: schema.Name, db: Session = Depends(get_db)):
-    return manageDB.searchUserProfile(db, name=name)
+@app.get("/users/me", response_model=UserPydantic)
+async def getUser(user: UserPydantic = Depends(getCurrentUser)):
+    return user
