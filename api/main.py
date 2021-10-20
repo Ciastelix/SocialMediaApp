@@ -58,3 +58,7 @@ async def createUser(user: UseerInPydantic):
 @app.get("/users/me", response_model=UserPydantic)
 async def getUser(user: UserPydantic = Depends(getCurrentUser)):
     return user
+
+@app.get("/posts/")
+async def getPosts():
+    posts = await getPosts
