@@ -29,7 +29,7 @@ register_tortoise(
     generate_schemas=True,
     add_exception_handlers=True
 )
-# TODO: zarzadanie postami, użytkownikiem, jwt
+# TODO: manage posts and users
 
 
 @app.post("/token")
