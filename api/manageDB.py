@@ -1,14 +1,20 @@
-from models import User
-from passlib.hash import bcrypt
-from fastapi import Depends, status, HTTPException
-from schemas import UserPydantic
-from main import oauth2Scheme
-import jwt
 from os import environ
+import jwt
+from fastapi import Depends, HTTPException, status
+from passlib.hash import bcrypt
+from fastapi.security import OAuth2PasswordBearer
+from models import User, Post
+from schemas import UserPydantic, UserPydanticToken, UserInPydantic, PostPydantic, PostInPydantic
+
+oauth2Scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
-async def createUser(user):
+async def createNewUser(user):
     return User(username=user.username, passwordHash=bcrypt.hash(user.passwordHash))
+
+
+async def createNewPost(post, userId):
+    return Post(title=post.title, content=post.content, creator_id=userId)
 
 
 async def authUser(username: str, password: str):
@@ -31,4 +37,20 @@ async def getCurrentUser(token: str = Depends(oauth2Scheme)):
             detail='Invalid username or password'
         )
 
-    return await UserPydantic.from_tortoise_orm(user)
+    return await UserPydanticToken.from_tortoise_orm(user)
+
+
+async def getAllUsers():
+    return await UserPydanticToken.from_queryset(User.all())
+
+
+async def getAllPosts():
+    return await PostPydantic.from_queryset(Post.all())
+
+
+async def getUserId(id):
+    return await User.get(id=id)
+
+
+async def getUserName(name):
+    return await UserPydantic.from_queryset(User.filter(username=name).all())
