@@ -1,5 +1,5 @@
 from typing import List
-from manageDB import createNewUser, authUser, getCurrentUser, oauth2Scheme, getAllUsers, getUserId, getUserName, createNewPost, getAllPosts
+from manageDB import createNewUser, authUser, getCurrentUser, oauth2Scheme, getAllUsers, getUserId, getUserName, createNewPost, getAllPosts, checkIfUserExists
 from schemas import UserInPydantic, UserPydantic, UserPydanticToken, PostInPydantic, PostPydantic
 from models import User
 import jwt
@@ -30,11 +30,10 @@ register_tortoise(
     generate_schemas=True,
     add_exception_handlers=True
 )
-# TODO: manage posts and users
 
 
 @app.post("/token")
-async def geenerateToken(form_data: OAuth2PasswordRequestForm = Depends()):
+async def generateToken(form_data: OAuth2PasswordRequestForm = Depends()):
     user = await authUser(form_data.username, form_data.password)
     if not user:
         return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid username or password")
@@ -44,30 +43,33 @@ async def geenerateToken(form_data: OAuth2PasswordRequestForm = Depends()):
     return {"access_token": token, "token_type": "bearer"}
 
 
-@app.get("/")
+@app.post("/")
 async def index(token: str = Depends(oauth2Scheme)):
-    return {"the_token": token}
+    return {"access_token": token}
 
 
-@app.post("/users", response_model=UserPydanticToken)
+@app.post("/users")
 async def createUser(user: UserInPydantic):
-    userObj = await createNewUser(user)
-    await userObj.save()
-    return await UserPydanticToken.from_tortoise_orm(userObj)
+    if not await checkIfUserExists(user.email, user.username):
+        userObj = await createNewUser(user)
+        await userObj.save()
+        return await UserPydantic.from_tortoise_orm(userObj)
+    else:
+        return HTTPException(status_code=406, detail="User with this email/username already exists")
 
 
 @app.get("/users", response_model=List[UserPydanticToken])
-async def getUsers():
+async def getUsers(user: UserPydantic = Depends(getCurrentUser)):
     return await getAllUsers()
 
 
 @app.get("/user/{id}", response_model=UserPydantic)
-async def getUserById(id: int):
+async def getUserById(id: int, user: UserPydantic = Depends(getCurrentUser)):
     return await getUserId(id)
 
 
 @app.post("/user/search/{name}", response_model=List[UserPydantic])
-async def getUserByName(name: str):
+async def getUserByName(name: str, user: UserPydantic = Depends(getCurrentUser)):
     return await getUserName(name)
 
 
@@ -75,14 +77,13 @@ async def getUserByName(name: str):
 async def getUser(user: UserPydantic = Depends(getCurrentUser)):
     return user
 
-#! fix
+
 @app.get("/posts/", response_model=List[PostPydantic])
-async def getPosts():
-    posts = await getAllPosts()
-    return posts
+async def getPosts(user: UserPydantic = Depends(getCurrentUser)):
+    return await getAllPosts()
 
 
-@app.post("/posts", response_model=PostPydantic)
+@app.post("/posts/", response_model=PostPydantic)
 async def createPost(post: PostInPydantic, user: UserPydantic = Depends(getCurrentUser)):
     postObj = await createNewPost(post, user.id)
     await postObj.save()

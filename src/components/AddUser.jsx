@@ -1,29 +1,28 @@
 import React, {useState} from 'react'
 import axios from 'axios'
 import styles from './Add.module.css'
+import { useHistory } from "react-router-dom";
+
 export default function AddPost() {
-    const [firstName, setFirstName] = useState("");
-    const [lastName, setLastName] = useState("");
+    const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
+    const [phoneNumber, setPhoneNumber] = useState("");
     const [passwd, setPasswd] = useState("");
+    let hist = useHistory()
+    const failed = () => {
+        alert("User with this username/email already exists!");
+        window.location.reload();
+    }
     const add = () => {
-        let formData = new FormData();
-        formData.append('firstName', firstName)
-        formData.append('lastName', lastName)
-        axios.post("http://localhost:8000/api/add-post", formData).then((res)=>console.log(res))
+        axios.post("http://localhost:8000/users", { "username": username, "passwordHash": passwd, "email": email, "phoneNumber": phoneNumber }).then((res) => res.data.status_code === 406 ? failed(): hist.push("/"))
     }
     return (
         <form className={styles.Form}>
-            <label className={styles.Label} for="_firstName_">
-                first{'\u00A0'}name
+            <label className={styles.Label} for="_username_">
+                username
             </label>
-                <input className={styles.Input} type="text" name="_firstName" id="_firstName_" onClick={e => setFirstName(e.target.value)} />
+                <input className={styles.Input} type="text" name="_username" id="_username_" onClick={e => setUsername(e.target.value)} />
             
-            <br />
-            <label className={styles.Label} for="_lastName_">
-                last{'\u00A0'}name
-            </label>
-            <input className={styles.Input} type="text" name="_lastName" id="_lastName_" onClick={e => setLastName(e.target.value)} />
             <br />
             <label className={styles.Label} for="_passwd_">
                 password
@@ -34,8 +33,13 @@ export default function AddPost() {
                 email
             </label>
             <input className={styles.Input} type="email" name="_email" id="_email_" onClick={e => setEmail(e.target.value)} />
+            <br />
+            <label className={styles.Label} for="_phone_">
+                phone number
+            </label>
+            <input className={styles.Input} type="text" name="phone" id="_phone_" onClick={e => setPhoneNumber(e.target.value)} />
             <br/>
-            <input className={styles.Input} type="button" value="Add Post" onClick={add}/>
+            <input className={styles.Input} type="button" value="Register" onClick={add}/>
         </form>
     )
 }

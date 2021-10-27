@@ -7,6 +7,7 @@ import NavBar from './components/NavBar';
 import SearchForUser from './components/SearchForUser'
 import { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import Login from './components/Login';
 export const MainContext = createContext();
 function App() {
   const [usrname, setUsrname] = useState(undefined);
@@ -28,10 +29,10 @@ function App() {
         <Route exact path="/" />
         <Route path="/profile/:id" component={Profile} />
         <Route path="/add/post" exact component={AddPost} />
-        <Route path="/add/user" exact component={AddUser} />
-        <Route path="/search/user/:usr" exact>
-          <SearchForUser/>
-        </Route>
+        <Route path="/search/user/:usr" exact component={SearchForUser} />
+        <Route path="/login" exact component={Login} />
+        <Route path="/register" exact component={AddUser} />
+          
 
 
         </Switch>

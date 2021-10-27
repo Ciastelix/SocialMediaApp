@@ -10,7 +10,7 @@ oauth2Scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 async def createNewUser(user):
-    return User(username=user.username, passwordHash=bcrypt.hash(user.passwordHash))
+    return User(username=user.username, passwordHash=bcrypt.hash(user.passwordHash), phoneNumber=user.phoneNumber, email=user.email)
 
 
 async def createNewPost(post, userId):
@@ -54,3 +54,11 @@ async def getUserId(id):
 
 async def getUserName(name):
     return await UserPydantic.from_queryset(User.filter(username=name).all())
+
+
+async def checkIfUserExists(email, name):
+    if not await UserPydantic.from_queryset(User.filter(username=name).all()):
+        if not await UserPydantic.from_queryset(User.filter(email=email).all()):
+            return False
+    else:
+        return True
