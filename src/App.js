@@ -1,4 +1,5 @@
-import { Route, Switch, Link } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
+import Cookies from 'universal-cookie';
 import './App.css';
 import AddPost from './components/AddPost';
 import Profile from './components/Profile';
@@ -10,14 +11,26 @@ import axios from 'axios';
 import Login from './components/Login';
 export const MainContext = createContext();
 function App() {
+  const cookies = new Cookies();
+  
+
   const [usrname, setUsrname] = useState(undefined);
   const [posts, setPosts] = useState([]);
   const currUsername = {
     usrname: usrname,
     setUsrname : (usr) => setUsrname(usr)
   }
-      useEffect(() => {
-        axios.get(`http://localhost:8000/get/posts`).then((res) => setPosts(res.data))
+
+  const token = cookies.get('token')
+  let headers = {
+        'Content-Type' : 'application/json',
+  'Accept' : 'application/json',
+  'Authorization' : `Bearer ${token}`
+ };
+    useEffect(() => {
+        axios.get(`http://localhost:8000/posts`, {
+    headers: headers
+}).then((res) => console.log(res))
       }, [])
   return (
     <MainContext.Provider value={currUsername}>

@@ -13,8 +13,8 @@ async def createNewUser(user):
     return User(username=user.username, passwordHash=bcrypt.hash(user.passwordHash), phoneNumber=user.phoneNumber, email=user.email)
 
 
-async def createNewPost(post, userId):
-    return Post(title=post.title, content=post.content, creator_id=userId)
+async def createNewPost(post):
+    return Post(title=post.title, content=post.content, creator_id=13)
 
 
 async def authUser(username: str, password: str):
@@ -28,8 +28,7 @@ async def authUser(username: str, password: str):
 
 async def getCurrentUser(token: str = Depends(oauth2Scheme)):
     try:
-        payload = jwt.decode(token, str(
-            environ.get("JWT_SECRET")), algorithms=['HS256'])
+        payload = jwt.decode(token, "tykurwo", algorithms=['HS256'])
         user = await User.get(id=payload.get('id'))
     except:
         raise HTTPException(
@@ -37,7 +36,7 @@ async def getCurrentUser(token: str = Depends(oauth2Scheme)):
             detail='Invalid username or password'
         )
 
-    return await UserPydanticToken.from_tortoise_orm(user)
+    return await UserPydantic.from_tortoise_orm(user)
 
 
 async def getAllUsers():

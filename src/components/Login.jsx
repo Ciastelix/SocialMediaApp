@@ -1,14 +1,18 @@
 import axios from "axios";
 import { useState } from "react";
+import Cookies from 'universal-cookie';
 
 export default function Login() {
     const [username, setUsername] = useState("");
     const [password, setPassowrd] = useState("");
+    const cookies = new Cookies();
     const login = () => {
-        let formdata = new FormData();
-        formdata.append('username', username);
-        formdata.append('password', password);
-        axios.post("http://localhost:8000/token/", formdata).then((res) => console.log(res));
+        
+        const serar = new URLSearchParams();
+        serar.append('username', username);
+        serar.append('password', password);
+        axios.post("http://localhost:8000/token", serar.toString(), { headers: { "Content-Type": "application/x-www-form-urlencoded" } }).then((res) => cookies.set('token', res.data.access_token, { path: '/'}));
+        
     }
     return (
         <>
