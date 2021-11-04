@@ -36,7 +36,7 @@ export default function AddPost() {
             <label className={styles.Label} for="_phone_">
                 phone number
             </label>
-            <input className={styles.Input} type="text" name="phone" id="_phone_" onChange={e => setPhoneNumber(e.target.value)} />
+            <input className={styles.Input} type="text" name="_phone" id="_phone_" onChange={e => setPhoneNumber(e.target.value)} />
             <br/>
             <input className={styles.Input} type="submit" value="Register"/>
         </form>

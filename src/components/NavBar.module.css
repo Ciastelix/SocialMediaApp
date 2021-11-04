@@ -6,7 +6,6 @@
   background-color: #f5f5f5;
 }
 
-/*  */
 .NavItem {
   display: block;
   float: left;
@@ -19,16 +18,19 @@
   height: 100%;
   color: #7f928b;
 }
+
 .NavItemS {
   width: 20%;
   float: right;
   text-transform: capitalize;
 }
+
 .Search {
   width: auto;
   height: 3.3em;
   margin: 0 10px 0;
 }
+
 .Btn {
   background-color: #f5f5f5;
   font-size: 0.7em;
@@ -38,14 +40,17 @@
   color: #7f928b;
   border: none;
 }
+
 .Btn:hover {
   color: black;
 }
+
 .NavBarContainer {
   width: 100%;
   clear: both;
   background-color: #f7a6da;
 }
+
 .Link {
   height: 100%;
   width: 100%;
@@ -53,6 +58,19 @@
   color: #7f928b;
   background-color: #f5f5f5;
 }
+
 .Link:hover {
   color: #a6b1f7;
+}
+.LoginButton{
+  background-color: #d2e8e0;
+  color: #a29c93;
+  border: none;
+  height: 100%;
+  width: 100%;
+}
+.LoginButton:hover{
+	background-color: #d2a6c2;
+    color: #425448;
+    border: 1px #d2a6da solid;
 }
