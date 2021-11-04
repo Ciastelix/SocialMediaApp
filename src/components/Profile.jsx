@@ -10,8 +10,7 @@ export default function Profile() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        axios.get(`http://localhost:8000/user/${id}`).then((res) => setUserData(res.data))
-        axios.get(`http://localhost:8000/posts/${id}`).then((res) => setPosts(res.data))
+        axios.get(`http://localhost:8000/users/me`).then((res) => setUserData(res.data))
         setLoading(false)
     }, [id])
     return (
@@ -20,7 +19,7 @@ export default function Profile() {
                 {userData && posts && <><h1 className={styles.Header}>Profile of {`${userData.firstName} ${userData.lastName}`}</h1>
                     <div className={styles.PostsPage}>
                     <h2 className={styles.Content}>Posts</h2>
-                    {posts.map((post) => (<><h3 className={styles.PostTitle}>{post.title}</h3><p className={styles.PostContent}>{ post.content }</p></>))}
+                    {userData.posts.map((post) => (<><h3 className={styles.PostTitle}>{post.title}</h3><p className={styles.PostContent}>{ post.content }</p></>))}
                     </div>
                     </>
                 }

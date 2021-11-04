@@ -4,7 +4,7 @@ from fastapi import Depends, HTTPException, status
 from passlib.hash import bcrypt
 from fastapi.security import OAuth2PasswordBearer
 from models import User, Post
-from schemas import UserPydantic, UserPydanticToken, UserInPydantic, PostPydantic, PostInPydantic
+from schemas import UserPydantic, UserPydanticToken, PostPydantic
 
 oauth2Scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -13,8 +13,8 @@ async def createNewUser(user):
     return User(username=user.username, passwordHash=bcrypt.hash(user.passwordHash), phoneNumber=user.phoneNumber, email=user.email)
 
 
-async def createNewPost(post):
-    return Post(title=post.title, content=post.content, creator_id=13)
+async def createNewPost(post, userId):
+    return Post(title=post.title, content=post.content, creator_id=userId)
 
 
 async def authUser(username: str, password: str):
@@ -28,7 +28,8 @@ async def authUser(username: str, password: str):
 
 async def getCurrentUser(token: str = Depends(oauth2Scheme)):
     try:
-        payload = jwt.decode(token, "tykurwo", algorithms=['HS256'])
+        payload = jwt.decode(token, str(environ.get(
+            "JWT_SECRET")), algorithms=['HS256'])
         user = await User.get(id=payload.get('id'))
     except:
         raise HTTPException(
@@ -56,8 +57,25 @@ async def getUserName(name):
 
 
 async def checkIfUserExists(email, name):
-    if not await UserPydantic.from_queryset(User.filter(username=name).all()):
-        if not await UserPydantic.from_queryset(User.filter(email=email).all()):
+    if not await UserPydantic.from_queryset(User.filter(username=name).exists()):
+        if not await UserPydantic.from_queryset(User.filter(email=email).exists()):
             return False
     else:
         return True
+
+
+async def updateUser(user, userId):
+    usr = user.dict(exclude_unset=True)
+    usr["passwordHash"] = bcrypt.hash(user.passwordHash)
+    print(usr)
+    await User.filter(id=userId).update(**usr)
+    return await UserPydantic.from_queryset_single(User.get(id=userId))
+
+
+async def updatePost(post):
+    post = post.dict(exclude_unset=True)
+    postId = post["id"]
+    print(Post.get(id=postId))
+    del post["id"]
+    await Post.filter(id=postId).update(**post)
+    return await PostPydantic.from_queryset_single(Post.get(id=postId))

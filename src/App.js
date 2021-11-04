@@ -9,6 +9,7 @@ import SearchForUser from './components/SearchForUser'
 import { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import Login from './components/Login';
+import Logout from './components/Logout';
 export const MainContext = createContext();
 function App() {
   const cookies = new Cookies();
@@ -30,7 +31,7 @@ function App() {
     useEffect(() => {
         axios.get(`http://localhost:8000/posts`, {
     headers: headers
-}).then((res) => console.log(res))
+}).then((res) => setPosts(res.data))
       }, [])
   return (
     <MainContext.Provider value={currUsername}>
@@ -45,6 +46,7 @@ function App() {
         <Route path="/search/user/:usr" exact component={SearchForUser} />
         <Route path="/login" exact component={Login} />
         <Route path="/register" exact component={AddUser} />
+        <Route path="/logout" exact component={Logout} />
           
 
 

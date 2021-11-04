@@ -1,11 +1,25 @@
 import React, {useState} from 'react'
 import axios from 'axios'
 import styles from './Add.module.css'
+import Cookies from 'universal-cookie';
+import { useHistory } from 'react-router';
 export default function AddPost() {
+    let hist = useHistory();
     const [title, setTitle] = useState();
     const [content, setContent] = useState();
+    const cookies = new Cookies();
+    const success = () => {
+        hist.push("/")
+        window.location.reload()
+    }
     const add = () => {
-        axios.post("http://localhost:8000/api/add-post", {"title": title, "content": content}).then((res)=>console.log(res))
+        const token = cookies.get('token')
+        let headers = {
+           'Content-Type' : 'application/json',
+            'Accept' : 'application/json',
+            'Authorization' : `Bearer ${token}`
+        }
+        axios.post("http://localhost:8000/posts", {"title": title, "content": content}, {headers: headers}).then((res)=>success()).catch((error)=>alert("Error"))
     }
     return (
         <form className={styles.Form}>

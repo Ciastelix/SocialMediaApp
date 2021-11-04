@@ -1,15 +1,15 @@
+# import graphene
 from typing import List
-from manageDB import createNewUser, authUser, getCurrentUser, oauth2Scheme, getAllUsers, getUserId, getUserName, createNewPost, getAllPosts, checkIfUserExists
-from schemas import UserInPydantic, UserPydantic, UserPydanticToken, PostInPydantic, PostPydantic, UserLogPydantic
-from models import User
+from manageDB import createNewUser, authUser, getCurrentUser, oauth2Scheme, getAllUsers, getUserId, getUserName, createNewPost, getAllPosts, checkIfUserExists, updateUser, updatePost
+from schemas import UserInPydantic, UserPydantic, UserPydanticToken, PostInPydantic, PostPydantic
 import jwt
 from os import environ
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi import FastAPI, Depends, HTTPException, status
 from tortoise.contrib.fastapi import register_tortoise
-
-
+# from starlette.graphql import GraphQLApp
+from models import Post
 app = FastAPI()
 
 origins = [
@@ -32,6 +32,16 @@ register_tortoise(
     add_exception_handlers=True
 )
 
+#! GraphQL
+# class Query(graphene.ObjectType):
+#     hello = graphene.String(name=graphene.String(default_value=", World!"))
+
+#     def resolve_hello(self, info, name):
+#         return "Hello" + name
+
+
+# app.add_route("/hello", GraphQLApp(schema=graphene.Schema(query=Query)))
+
 
 @app.post('/token')
 async def generate_token(form_data: OAuth2PasswordRequestForm = Depends()):
@@ -44,7 +54,7 @@ async def generate_token(form_data: OAuth2PasswordRequestForm = Depends()):
         )
 
     user_obj = await UserPydantic.from_tortoise_orm(user)
-    token = jwt.encode(user_obj.dict(), "tykurwo")
+    token = jwt.encode(user_obj.dict(), str(environ.get("JWT_SECRET")))
 
     return {'access_token': token, 'token_type': 'bearer'}
 
@@ -75,7 +85,7 @@ async def getUserById(id: int, token: UserPydantic = Depends(getCurrentUser)):
     return await getUserId(id)
 
 
-@app.post("/user/search/{name}", response_model=List[UserPydantic])
+@app.get("/user/search/{name}", response_model=List[UserPydantic])
 async def getUserByName(name: str, token: UserPydantic = Depends(getCurrentUser)):
     return await getUserName(name)
 
@@ -86,13 +96,13 @@ async def getUser(user: UserPydantic = Depends(getCurrentUser)):
 
 
 @app.put("/user", response_model=UserPydantic)
-async def alterUser(user: UserPydantic, token: UserPydantic = Depends(getCurrentUser)):
-    return
+async def alterUser(user: UserInPydantic, token: UserPydantic = Depends(getCurrentUser)):
+    return await updateUser(user, token.id)
 
 
 @app.put("/posts", response_model=PostPydantic)
-async def alterPost(post: PostInPydantic, token: UserPydantic = Depends(getCurrentUser)):
-    return
+async def alterPost(post: PostPydantic, token: UserPydantic = Depends(getCurrentUser)):
+    return await updatePost(post)
 
 
 @app.delete("/posts")
@@ -102,11 +112,13 @@ async def alterPost(post: PostInPydantic, token: UserPydantic = Depends(getCurre
 
 @app.get("/posts", response_model=List[PostPydantic])
 async def getPosts(token: UserPydantic = Depends(getCurrentUser)):
-    return await getAllPosts()
+    posts = await getAllPosts()
+    print(Post.all())
+    return posts
 
 
-@app.post("/posts/")
-async def createPost(post: PostInPydantic):
-    postObj = await createNewPost(post)
+@app.post("/posts")
+async def createPost(post: PostInPydantic, token: UserPydantic = Depends(getCurrentUser)):
+    postObj = await createNewPost(post, token.id)
     await postObj.save()
     return await PostPydantic.from_tortoise_orm(postObj)

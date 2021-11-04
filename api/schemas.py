@@ -7,6 +7,6 @@ UserLogPydantic = pydantic_model_creator(
     User, name="UserIn", exclude_readonly=True, exclude=("email", "phoneNumber"))
 PostPydantic = pydantic_model_creator(Post, name="Post")
 PostInPydantic = pydantic_model_creator(
-    Post, name="PostIn", exclude_readonly=True)
+    Post, name="PostIn", exclude_readonly=True, exclude=("creator"))
 UserPydanticToken = pydantic_model_creator(
     User, name="UserToken", exclude=("passwordHash"))
