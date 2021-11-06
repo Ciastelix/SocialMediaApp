@@ -17,10 +17,6 @@ export default function Profile() {
         <>
             {!loading ? <>
                 {userData && posts && <><h1 className={styles.Header}>Profile of {`${userData.firstName} ${userData.lastName}`}</h1>
-                    <div className={styles.PostsPage}>
-                    <h2 className={styles.Content}>Posts</h2>
-                    {userData.posts.map((post) => (<><h3 className={styles.PostTitle}>{post.title}</h3><p className={styles.PostContent}>{ post.content }</p></>))}
-                    </div>
                     </>
                 }
             </> :
@@ -28,4 +24,3 @@ export default function Profile() {
         </>
     )
 }
-
